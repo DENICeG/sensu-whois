@@ -1,0 +1,20 @@
+type: CheckConfig
+metadata:
+  name: sensu-whois
+  namespace: default
+spec:
+  command: "sensu-whois --host whois.denic.de"
+  high_flap_threshold: 0
+  interval: 30
+  low_flap_threshold: 0
+  round_robin: false
+  publish: true
+  handlers:
+  - mattermost-rex
+  runtime_assets:
+  - sensu-whois
+  subscriptions:
+  - global
+  output_metric_format: graphite_plaintext
+  output_metric_handlers:
+  - influxdb-rex

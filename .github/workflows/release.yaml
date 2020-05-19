@@ -1,0 +1,40 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+name: Create Release
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - id: get_tag_name
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - uses: actions/checkout@v2
+      - uses: actions/create-release@v1
+        id: create_release
+        env:
+          # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_tag_name.outputs.VERSION }}
+          release_name: ${{ steps.get_tag_name.outputs.VERSION }}
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # The upload_url for the current release can be extracted from the "outputs" object of create_release step above.
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/sensu-whois_${{ steps.get_tag_name.outputs.VERSION }}_linux_amd64.tar.gz
+          asset_name: sensu-whois_${{ steps.get_tag_name.outputs.VERSION }}_linux_amd64.tar.gz
+          asset_content_type: application/gzip
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/sensu-whois_${{ steps.get_tag_name.outputs.VERSION }}_sha512_checksums.txt
+          asset_name: sensu-whois_${{ steps.get_tag_name.outputs.VERSION }}_sha512_checksums.txt
+          asset_content_type: text/plain
