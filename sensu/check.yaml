@@ -11,6 +11,7 @@ spec:
   publish: true
   handlers:
   - mattermost-rex
+  - pagerduty-rex
   runtime_assets:
   - sensu-whois
   subscriptions:
