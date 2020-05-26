@@ -31,6 +31,7 @@ spec:
   subscriptions:
   - global
   publish: true
+  proxy_entity_name: whois
   interval: 30
   handlers:
   - mattermost-rex
