@@ -2,16 +2,13 @@ type: CheckConfig
 metadata:
   name: sensu-whois
   namespace: default
+  labels:
+    "aggregate": sensu-whois
 spec:
   command: "sensu-whois --host whois.denic.de"
-  high_flap_threshold: 0
   interval: 30
-  low_flap_threshold: 0
   round_robin: false
   publish: true
-  handlers:
-  - mattermost-rex
-  - pagerduty-rex
   runtime_assets:
   - sensu-whois
   subscriptions:
@@ -19,3 +16,23 @@ spec:
   output_metric_format: graphite_plaintext
   output_metric_handlers:
   - influxdb-rex
+
+---
+
+api_version: core/v2
+type: CheckConfig
+metadata:
+  namespace: default
+  name: sensu-whois-aggregate
+spec:
+  runtime_assets:
+  - aggregate
+  command: "sensu-aggregate-check -s -i --api-host <host> --api-port 443 --api-user=<user> --api-pass=<password> --check-labels='aggregate=sensu-whois' --crit-percent=67"
+  subscriptions:
+  - global
+  publish: true
+  interval: 30
+  handlers:
+  - mattermost-rex
+  - pagerduty-rex
+  #- email-rex   # prod only

@@ -3,4 +3,5 @@
 Creating releases for sensu is handled by GitHub Actions.
 
 - run `./publish_release.sh v1.x.y` (and commit interactively)
+- edit live credentials into `sensu/check.yaml`
 - apply `sensu/asset.yaml` and `sensu/check.yaml` via sensuctl
