@@ -12,20 +12,22 @@ import (
 	"github.com/danielb42/whiteflag"
 )
 
+var (
+	stringToLookFor = "alive"
+)
+
 func main() {
 	log.SetOutput(os.Stderr)
 
-	whiteflag.Alias("host", "whoisserver", "sets the whois-server used to perform the check")
+	whiteflag.Alias("h", "host", "sets the whois-server used to perform the check")
 	whiteflag.ParseCommandLine()
-	whoisServer := whiteflag.GetString("whoisserver") + ":43"
-
-	timeBegin := time.Now()
+	whoisServer := whiteflag.GetString("host") + ":43"
 
 	conn, err := net.DialTimeout("tcp", whoisServer, 10*time.Second)
 	if err != nil {
 		log.Printf("could not connect to %s: %s\n", whoisServer, err.Error())
-		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, timeBegin.Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, time.Now().Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, time.Now().Unix())
 
 		if conn != nil {
 			conn.Close()
@@ -33,6 +35,8 @@ func main() {
 
 		os.Exit(2)
 	}
+
+	timeBegin := time.Now()
 
 	_, err = conn.Write([]byte("alive@whois" + "\r\n"))
 	if err != nil {
@@ -52,17 +56,17 @@ func main() {
 		os.Exit(2)
 	}
 
-	if bytes.Contains(buf, []byte("alive")) {
-		whoisResponseTime := time.Since(timeBegin)
+	whoisResponseTime := time.Since(timeBegin).Milliseconds()
 
+	if bytes.Contains(buf, []byte(stringToLookFor)) {
 		fmt.Printf("%s %d %d\n", "sensu.whois.available", 1, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", whoisResponseTime.Milliseconds(), timeBegin.Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.duration", whoisResponseTime, timeBegin.Unix())
 		_ = conn.Close()
 		os.Exit(0)
 	} else {
 		log.Printf("whois did not reply 'alive'\n")
 		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, timeBegin.Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.duration", whoisResponseTime, timeBegin.Unix())
 		_ = conn.Close()
 		os.Exit(2)
 	}
