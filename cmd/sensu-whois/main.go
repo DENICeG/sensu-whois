@@ -19,9 +19,9 @@ var (
 func main() {
 	log.SetOutput(os.Stderr)
 
-	whiteflag.Alias("h", "host", "sets the whois-server used to perform the check")
+	whiteflag.Alias("s", "server", "sets the whois-server used to perform the check")
 	whiteflag.ParseCommandLine()
-	whoisServer := whiteflag.GetString("host") + ":43"
+	whoisServer := whiteflag.GetString("server") + ":43"
 
 	conn, err := net.DialTimeout("tcp", whoisServer, 10*time.Second)
 	if err != nil {
