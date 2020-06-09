@@ -4,5 +4,5 @@ metadata:
   name: sensu-whois
   namespace: default
 spec:
-  sha512: 98ef04d451c0fafbcc037ae76eccc1b392a4df0ea3ff0222ba815a3c7b14a7ba586a81def2f0271ffa205cca7dc7f6a5cdcab496ff393d8d7b306fcdeb1954d8
-  url: https://github.com/DENICeG/sensu-whois/releases/download/v1.1.3/sensu-whois_v1.1.3_linux_amd64.tar.gz
+  sha512: 1fc3624d85ad46a150b95cc5e9f53e7aa22cd4b2645542230d6a6e38455006a31d53ec21fea52bfe61ca9aacdb38874c4ffb772ba047520ebc9c3c78302b50c2
+  url: https://github.com/DENICeG/sensu-whois/releases/download/v1.1.4/sensu-whois_v1.1.4_linux_amd64.tar.gz

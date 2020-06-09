@@ -64,7 +64,7 @@ func main() {
 		_ = conn.Close()
 		os.Exit(0)
 	} else {
-		log.Printf("whois did not reply 'alive'\n")
+		log.Println("error: whois did not reply 'alive'")
 		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
 		fmt.Printf("%s %d %d\n", "sensu.whois.duration", whoisResponseTime, timeBegin.Unix())
 		_ = conn.Close()
