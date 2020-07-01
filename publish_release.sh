@@ -7,7 +7,7 @@ else
   TAG=$1
 fi
 
-go build -o bin/sensu-whois cmd/sensu-whois/main.go
+CGO_ENABLED=0 go build -o bin/sensu-whois cmd/sensu-whois/main.go
 tar czf sensu-whois_${TAG}_linux_amd64.tar.gz bin/
 
 sha512sum sensu-whois_${TAG}_linux_amd64.tar.gz > sensu-whois_${TAG}_sha512_checksums.txt
