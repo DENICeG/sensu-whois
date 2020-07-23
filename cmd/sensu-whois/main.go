@@ -23,11 +23,13 @@ func main() {
 	whiteflag.ParseCommandLine()
 	whoisServer := whiteflag.GetString("server") + ":43"
 
+	timeBegin := time.Now()
+
 	conn, err := net.DialTimeout("tcp", whoisServer, 10*time.Second)
 	if err != nil {
 		log.Printf("ERROR: could not connect to %s: %s\n\n", whoisServer, err.Error())
-		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, time.Now().Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, time.Now().Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, timeBegin.Unix())
 
 		if conn != nil {
 			conn.Close()
@@ -35,8 +37,6 @@ func main() {
 
 		os.Exit(2)
 	}
-
-	timeBegin := time.Now()
 
 	_, err = conn.Write([]byte("alive@whois" + "\r\n"))
 	if err != nil {
