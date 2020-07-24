@@ -14,61 +14,66 @@ import (
 
 var (
 	stringToLookFor = "alive"
+	timeBegin       = time.Now()
+	conn            net.Conn
 )
 
 func main() {
+
+	var err error
 	log.SetOutput(os.Stderr)
 
 	whiteflag.Alias("s", "server", "sets the whois-server used to perform the check")
 	whiteflag.ParseCommandLine()
 	whoisServer := whiteflag.GetString("server") + ":43"
 
-	timeBegin := time.Now()
-
-	conn, err := net.DialTimeout("tcp", whoisServer, 10*time.Second)
+	conn, err = net.DialTimeout("tcp", whoisServer, 10*time.Second)
 	if err != nil {
-		log.Printf("ERROR: could not connect to %s: %s\n\n", whoisServer, err.Error())
-		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, timeBegin.Unix())
-
-		if conn != nil {
-			conn.Close()
-		}
-
-		os.Exit(2)
+		printFailMetricsAndExit("could not connect to", whoisServer, err.Error())
 	}
+	defer conn.Close()
 
 	_, err = conn.Write([]byte("alive@whois" + "\r\n"))
 	if err != nil {
-		log.Printf("ERROR: could not send data to whois: %s\n\n", err.Error())
-		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, timeBegin.Unix())
-		_ = conn.Close()
-		os.Exit(2)
+		printFailMetricsAndExit("could not send data to whois:", err.Error())
 	}
+
+	timeConnectDone := time.Now()
 
 	buf, err := ioutil.ReadAll(conn)
 	if err != nil {
-		log.Printf("ERROR: could not read data from whois: %s\n\n", err.Error())
-		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, timeBegin.Unix())
-		_ = conn.Close()
-		os.Exit(2)
+		printFailMetricsAndExit("could not read data from whois:", err.Error())
 	}
 
-	whoisResponseTime := time.Since(timeBegin).Milliseconds()
+	durationConnect := timeConnectDone.Sub(timeBegin).Milliseconds()
+	durationOrder := time.Now().Sub(timeConnectDone).Milliseconds() // nolint:gosimple
+	duration := durationConnect + durationOrder
 
 	if bytes.Contains(buf, []byte(stringToLookFor)) {
 		log.Printf("OK: whois replied 'alive'\n\n")
 		fmt.Printf("%s %d %d\n", "sensu.whois.available", 1, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", whoisResponseTime, timeBegin.Unix())
-		_ = conn.Close()
-		os.Exit(0)
+		fmt.Printf("%s %d %d\n", "sensu.whois.duration", duration, timeBegin.Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.duration.connect", durationConnect, timeBegin.Unix())
+		fmt.Printf("%s %d %d\n", "sensu.whois.duration.order", durationOrder, timeBegin.Unix())
 	} else {
-		log.Printf("ERROR: whois did not reply 'alive'\n\n")
-		fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
-		fmt.Printf("%s %d %d\n", "sensu.whois.duration", whoisResponseTime, timeBegin.Unix())
-		_ = conn.Close()
-		os.Exit(2)
+		printFailMetricsAndExit("whois did not reply 'alive'")
 	}
+}
+
+func printFailMetricsAndExit(errors ...string) {
+
+	errStr := "ERROR:"
+
+	for _, err := range errors {
+		errStr += " " + err
+	}
+
+	log.Printf("%s\n\n", errStr)
+	fmt.Printf("%s %d %d\n", "sensu.whois.available", 0, timeBegin.Unix())
+	fmt.Printf("%s %d %d\n", "sensu.whois.duration", 0, timeBegin.Unix())
+	fmt.Printf("%s %d %d\n", "sensu.whois.duration.connect", 0, timeBegin.Unix())
+	fmt.Printf("%s %d %d\n", "sensu.whois.duration.order", 0, timeBegin.Unix())
+
+	conn.Close() // nolint:errcheck
+	os.Exit(2)
 }
