@@ -74,6 +74,9 @@ func printFailMetricsAndExit(errors ...string) {
 	fmt.Printf("%s %d %d\n", "sensu.whois.duration.connect", 0, timeBegin.Unix())
 	fmt.Printf("%s %d %d\n", "sensu.whois.duration.order", 0, timeBegin.Unix())
 
-	conn.Close() // nolint:errcheck
+	if conn != nil {
+		conn.Close() // nolint:errcheck
+	}
+
 	os.Exit(2)
 }
