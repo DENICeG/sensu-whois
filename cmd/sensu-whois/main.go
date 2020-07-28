@@ -33,12 +33,12 @@ func main() {
 	}
 	defer conn.Close()
 
+	timeConnectDone := time.Now()
+
 	_, err = conn.Write([]byte("alive@whois" + "\r\n"))
 	if err != nil {
 		printFailMetricsAndExit("could not send data to whois:", err.Error())
 	}
-
-	timeConnectDone := time.Now()
 
 	buf, err := ioutil.ReadAll(conn)
 	if err != nil {
