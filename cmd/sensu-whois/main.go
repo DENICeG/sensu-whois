@@ -47,14 +47,16 @@ func main() {
 
 	durationConnect := timeConnectDone.Sub(timeBegin).Milliseconds()
 	durationOrder := time.Now().Sub(timeConnectDone).Milliseconds() // nolint:gosimple
+	durationTotal := durationConnect + durationOrder
 
 	if bytes.Contains(buf, []byte(stringToLookFor)) {
 		log.Printf("OK: whois replied 'alive'\n\n")
-		fmt.Printf("extmon,service=%s %s=%d,%s=%d,%s=%d %d\n",
+		fmt.Printf("extmon,service=%s %s=%d,%s=%d,%s=%d,%s=%d %d\n",
 			"whois",
 			"available", 1,
 			"connect", durationConnect,
 			"order", durationOrder,
+			"total", durationTotal,
 			timeBegin.Unix())
 	} else {
 		printFailMetricsAndExit("whois did not reply 'alive'")
@@ -71,11 +73,12 @@ func printFailMetricsAndExit(errors ...string) {
 
 	log.Printf("%s\n\n", errStr)
 
-	fmt.Printf("extmon,service=%s %s=%d,%s=%d,%s=%d %d\n",
+	fmt.Printf("extmon,service=%s %s=%d,%s=%d,%s=%d,%s=%d %d\n",
 		"whois",
 		"available", 0,
 		"connect", 0,
 		"order", 0,
+		"total", 0,
 		timeBegin.Unix())
 
 	if conn != nil {

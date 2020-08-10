@@ -3,5 +3,5 @@ api_version: core/v2
 metadata:
   name: sensu-whois
 spec:
-  sha512: b1798d39254edb1cdcc2259b6681523a8d5e1e29d8bce3e009c37001ac90bcb8cc2b573884b8063318e662e219a80b1b45aecb1adb1664e4a6b3fa3a31528146
-  url: https://github.com/DENICeG/sensu-whois/releases/download/v2.0.0/sensu-whois_v2.0.0_linux_amd64.tar.gz
+  sha512: ea032778e4cab717c79d63ab0ad949e7e54cc9c4ffcad2443b13ddfc73c42225dfbbf79b370ae120803b87bef5f49b4809066685144c2f0d1fcd71e03a18a5e3
+  url: https://github.com/DENICeG/sensu-whois/releases/download/v2.0.1/sensu-whois_v2.0.1_linux_amd64.tar.gz
