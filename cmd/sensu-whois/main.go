@@ -16,9 +16,14 @@ var (
 	stringToLookFor = "alive"
 	timeBegin       = time.Now()
 	conn            net.Conn
+	fails           int
 )
 
 func main() {
+	run()
+}
+
+func run() {
 
 	var err error
 	log.SetOutput(os.Stderr)
@@ -31,7 +36,6 @@ func main() {
 	if err != nil {
 		printFailMetricsAndExit("could not connect to", whoisServer, err.Error())
 	}
-	defer conn.Close()
 
 	timeConnectDone := time.Now()
 
@@ -61,9 +65,17 @@ func main() {
 	} else {
 		printFailMetricsAndExit("whois did not reply 'alive'")
 	}
+
+	conn.Close()
+	os.Exit(0)
 }
 
 func printFailMetricsAndExit(errors ...string) {
+
+	if fails < 3 {
+		fails++
+		run()
+	}
 
 	errStr := "ERROR:"
 
