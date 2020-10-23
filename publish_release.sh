@@ -21,6 +21,6 @@ rm -f artifacts/*
 mv sensu-whois_${TAG}_linux_amd64.tar.gz sensu-whois_${TAG}_sha512_checksums.txt artifacts/
 
 git add .
-git commit
+git commit -m $TAG
 git tag $TAG
 git push && git push --tags

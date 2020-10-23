@@ -16,21 +16,24 @@ var (
 	stringToLookFor = "alive"
 	timeBegin       = time.Now()
 	conn            net.Conn
+	whoisServer     string
 	fails           int
 )
 
 func main() {
+	whiteflag.Alias("s", "server", "sets the whois-server used to perform the check")
+	whoisServer = whiteflag.GetString("server") + ":43"
+
 	run()
 }
 
 func run() {
-
 	var err error
 	log.SetOutput(os.Stderr)
 
-	whiteflag.Alias("s", "server", "sets the whois-server used to perform the check")
-	whiteflag.ParseCommandLine()
-	whoisServer := whiteflag.GetString("server") + ":43"
+	if conn != nil {
+		conn.Close() // nolint:errcheck
+	}
 
 	conn, err = net.DialTimeout("tcp", whoisServer, 10*time.Second)
 	if err != nil {

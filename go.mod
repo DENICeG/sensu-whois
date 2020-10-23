@@ -1,4 +1,4 @@
-module github.com/DENICeG/sensu-whois
+module github.com/DENICeG/sensu-whois/v2
 
 go 1.15
 
