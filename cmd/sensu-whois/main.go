@@ -13,8 +13,9 @@ import (
 )
 
 var (
+	timeBegin = time.Now()
+
 	stringToLookFor = "alive"
-	timeBegin       = time.Now()
 	conn            net.Conn
 	whoisServer     string
 	fails           int
@@ -42,21 +43,21 @@ func run() {
 		printFailMetricsAndExit("could not connect to", whoisServer, err.Error())
 	}
 
-	timeConnectDone := time.Now()
+	durationConnect := time.Since(timeBegin).Milliseconds()
 
 	_, err = conn.Write([]byte("alive@whois" + "\r\n"))
 	if err != nil {
 		printFailMetricsAndExit("could not send data to whois:", err.Error())
 	}
 
+	timeSendDone := time.Now()
+
 	buf, err := ioutil.ReadAll(conn)
 	if err != nil {
 		printFailMetricsAndExit("could not read data from whois:", err.Error())
 	}
 
-	durationConnect := timeConnectDone.Sub(timeBegin).Milliseconds()
-	durationOrder := time.Now().Sub(timeConnectDone).Milliseconds() // nolint:gosimple
-	durationTotal := durationConnect + durationOrder
+	durationOrder := time.Since(timeSendDone).Milliseconds() + 1
 
 	if bytes.Contains(buf, []byte(stringToLookFor)) {
 		log.Printf("OK: whois replied 'alive'\n\n")
@@ -65,7 +66,7 @@ func run() {
 			"available", 1,
 			"connect", durationConnect,
 			"order", durationOrder,
-			"total", durationTotal,
+			"total", durationConnect+durationOrder,
 			timeBegin.Unix())
 	} else {
 		printFailMetricsAndExit("whois did not reply 'alive'")
